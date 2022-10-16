@@ -1,0 +1,92 @@
+import academia.*
+
+describe "Academia de Magia" {
+	
+	const pelota = new Cosa (volumen = 3, marca = cuchuflito, esMagico = false, esReliquia= false)
+	const escoba = new Cosa (volumen = 4, marca = acme, esMagico = true, esReliquia = true) 
+	const varita = new Cosa (volumen = 1, marca = fenix, esMagico = true, esReliquia = false) 
+	const pava = new Cosa (volumen = 2, marca = acme, esMagico = false, esReliquia = true) 
+	const lamparaAladino = new Cosa (volumen = 3, marca = fenix, esMagico = true, esReliquia = true) 
+	const baul = new Baul (capacidadMaxima = 5, cosas = #{escoba}) 
+	const gabineteMagico = new GabineteMagico (cosas = #{varita})
+	const armario = new ArmarioConvencional (capacidadMaxima = 2, cosas = #{pelota}) 
+	const academia = new Academia (inventario = #{baul, gabineteMagico, armario}) 
+
+
+ test "punto 1.1 saber si está guardado algo" {
+  	assert.that(academia.tengoCosa(varita))
+  	assert.that(academia.tengoCosa(pelota))
+  	assert.that(academia.tengoCosa(escoba))
+  	assert.notThat(academia.tengoCosa(pava))
+  	assert.notThat(academia.tengoCosa(lamparaAladino))
+  	}
+
+
+ test "punto 1.2, saber en que mueble esta guardado algo" {
+ 	assert.that(baul.tengoCosa(escoba))
+ 	assert.that(gabineteMagico.tengoCosa(varita))
+ 	assert.that(armario.tengoCosa(pelota))
+ 	}
+ 
+ test "punto 1.3, saber si se puede guardar algo" {
+ 	assert.notThat(academia.puedoGuardar(varita))
+ 	assert.notThat(academia.puedoGuardar(pelota))
+ 	assert.notThat(academia.puedoGuardar(varita))
+ 	assert.that(academia.puedoGuardar(pava))
+ 	assert.that(academia.puedoGuardar(lamparaAladino))
+ 	armario.cambiarCapacidad(1)
+ 	assert.notThat(academia.puedoGuardar(pava))
+  	}
+test "punto 1.4 saber en que muebles se puede guardar algo" {
+	assert.equals(#{armario}, academia.enDondeGuardo(pava))
+	assert.equals(#{armario,gabineteMagico}, academia.enDondeGuardo(lamparaAladino))
+  }
+test "punto 1.5. guardar una cosa" {
+ 	academia.guardarCosa(pava)
+ 	assert.that(academia.tengoCosa(pava))
+ 	academia.guardarCosa(lamparaAladino)
+ 	assert.that(academia.tengoCosa(pava))
+ 	assert.throwsException({academia.guardarCosa(escoba)})
+ 	assert.throwsException({academia.guardarCosa(pelota)})
+ 	assert.throwsException({academia.guardarCosa(varita)})
+ 	}
+test "punto 1.5 no poder guardar una cosa por culpa de que no hay mueble" {
+ 	armario.cambiarCapacidad(1)
+ 	academia.guardarCosa(lamparaAladino)
+ 	assert.notThat(academia.tengoCosa(pava))
+ 	}
+test "punto 2.1 utilidad" {
+	armario.guardarCosa(pava)
+	gabineteMagico.guardarCosa(lamparaAladino)
+  	const baulMagico = new BaulMagico (capacidadMaxima = 12, cosas = #{escoba,lamparaAladino })
+  	assert.equals(1.1, armario.utilidad())
+  	assert.equals(3, gabineteMagico.utilidad())
+  	assert.equals(4, baul.utilidad())
+  	assert.equals(5, baulMagico.utilidad())
+  	}
+test "punto 2.2 cosas menos utiles" {
+	armario.guardarCosa(pava)
+	gabineteMagico.guardarCosa(lamparaAladino)
+	assert.equals(#{pelota, varita, escoba}, academia.cosasMenosUtiles())
+  	}
+test "punto 2.3 marca de cosa menos util" {
+	armario.guardarCosa(pava)
+	gabineteMagico.guardarCosa(lamparaAladino)
+	assert.equals(cuchuflito, academia.marcaMenosUtil())
+  	}
+ test "punto 2.4 remover cosas menos utiles que no son magicas" {
+ 	armario.guardarCosa(pava)
+	gabineteMagico.guardarCosa(lamparaAladino)
+	academia.removerCosasMenosUtil()
+	assert.that(academia.tengoCosa(varita))
+  	assert.notThat(academia.tengoCosa(pelota))
+  	assert.that(academia.tengoCosa(escoba))	
+	assert.that(academia.tengoCosa(pava))
+	assert.that(academia.tengoCosa(lamparaAladino))
+  	}
+test "punto 2.4 imposible remover cosas menos utiles que no son magicas" {
+	academia.removerMueble(gabineteMagico)
+	assert.throwsException({academia.removerCosasMenosUtilYMagicas()})
+ 	}
+}
+
